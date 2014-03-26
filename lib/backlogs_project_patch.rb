@@ -334,6 +334,10 @@ private
           aggregate_list = " array_to_string(array_agg(#{field_name}),',') as list "
         elsif adapter_name.starts_with? 'sqlite'
           aggregate_list = " GROUP_CONCAT(#{field_name}) as list "
+        elsif adapter_name.starts_with? 'sqlserver'
+          Rails.logger.debug "######### If GROUP_CONCAT fails, you might want to instal this in your SQL Server 
+            ######### http://groupconcat.codeplex.com/"
+          aggregate_list = " dbo.GROUP_CONCAT(#{field_name}) as list "
         else
           raise NotImplementedError, "Unknown adapter '#{adapter_name}'"
         end

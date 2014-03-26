@@ -105,6 +105,13 @@ class RbStory < Issue
   end
 
   def self.backlog(project_id, sprint_id, release_id, options={})
+#    self.visible.order("#{self.table_name}.position").
+#      backlog_scope(
+#        options.merge({
+#          :project => project_id,
+#          :sprint => sprint_id,
+#          :release => release_id
+#      }))
     self.visible.order("#{self.table_name}.position").
       backlog_scope(
         options.merge({

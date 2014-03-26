@@ -205,6 +205,7 @@ class RbRelease < ActiveRecord::Base
 
   #Return sprints that contain issues within this release
   def sprints
+    Rails.logger.debug "##### getting sprints from RBRelease"
     RbSprint.where('id in (select distinct(fixed_version_id) from issues where release_id=?)', id).order('versions.effective_date')
   end
 
@@ -217,6 +218,7 @@ class RbRelease < ActiveRecord::Base
     order = Backlogs.setting[:sprint_sort_order] == 'desc' ? 'DESC' : 'ASC'
 #return issues sorted into sprints. Obviously does not return issues which are not in a sprint
 #unfortunately, group_by returns unsorted results.
+
     issues.where(:tracker_id => RbStory.trackers).joins(:fixed_version).includes(:fixed_version).order("versions.effective_date #{order}").group_by(&:fixed_version_id)
   end
 

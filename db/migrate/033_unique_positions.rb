@@ -27,7 +27,10 @@ class UniquePositions < ActiveRecord::Migration
       }
     end
 
+    #SQLServer cannot change the type of an indexes column, so it must be dropped first
+    remove_index :issues, :position
     change_column :issues, :position, :integer, :null => false
+    add_index :issues, :position
 
     # Needed until MySQL undoes the retardation that is http://bugs.mysql.com/bug.php?id=5573
     add_column :issues, :position_lock, :integer, :null=>false, :default => 0

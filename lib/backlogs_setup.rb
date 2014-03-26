@@ -151,9 +151,37 @@ module Backlogs
     available = available[-1]
 
     ran = []
-    Setting.connection.execute("select version from schema_migrations where version like '%-redmine_backlogs'").each{|m|
-      ran << Integer((m.is_a?(Hash) ? m.values : m)[0].split('-')[0])
-    }
+    dbconfig = YAML.load_file(File.join(File.dirname(__FILE__), '../../../config/database.yml'))#[Rails.env]['username']
+    
+    Rails.logger.debug "#### Using #{dbconfig[Rails.env]['adapter']} database adapter."
+    
+    if dbconfig[Rails.env]['adapter'] == 'sqlserver' then
+      database = dbconfig[Rails.env]['database']
+      dataserver = dbconfig[Rails.env]['dataserver']
+      mode = dbconfig[Rails.env]['mode']
+      port = dbconfig[Rails.env]['port']
+      username = dbconfig[Rails.env]['username']
+      password = dbconfig[Rails.env]['password']
+      
+      client = TinyTds::Client.new(
+        :database => database,
+        :dataserver => dataserver,
+        :mode => mode,
+        :port => port,
+        :username => username,
+        :password => password)
+      
+      client.execute("select version from schema_migrations where version like '%-redmine_backlogs'").each{|m|
+        ran << Integer((m.is_a?(Hash) ? m.values : m)[0].split('-')[0])
+      }
+    else
+      Setting.connection.execute("select version from schema_migrations where version like '%-redmine_backlogs'").each{|m|
+        ran << Integer((m.is_a?(Hash) ? m.values : m)[0].split('-')[0])
+      }
+    end
+    
+    Rails.logger.debug "##### result from schema_migration query: #{ran.inspect}"
+    
     return false if ran.size == 0
     ran = ran.sort[-1]
 
